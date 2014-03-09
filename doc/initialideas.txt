@@ -1,0 +1,149 @@
+requirements:
+
+- framework independent
+- orm independent
+- dependend on:
+    - tmoauth for twitter/instagram/facebook/youtube
+    - symfony/console for CLI
+    - pcntl for forking (only linux)
+- providers can run in own thread and use stream-api
+- providers can run once
+- providers can use public or private access
+
+
+components:
+
+core
+    modules
+        job-queue-batch-processing
+            thread based
+            run as service
+            run once
+        cli
+            runOnce
+            service
+        unified entity
+        job
+            authenticate
+            fetch
+            map
+            persist
+        provider-list
+            add
+            clear
+            remove
+    providers
+        authentication
+        mapping
+
+
+high level architecture description
+
+core
+    provide a way to start sync
+    call the corresponding apis in a save and secure way
+    persist response in structured way (if not already synced)
+    provide a way to query data harvested this way
+
+core.job
+    provider-type
+    provider-api-query
+    run every X
+    query X @ max
+    timeout
+
+
+provider
+    cli-command to create working auth-config
+
+
+what has to be defined by the user?
+    concrete provider entity - abstract enties can be extended or interface can be used
+    mapping config for JsonMapper
+    provider-auth-config
+    job-config
+        type: once, streamed
+        auth-type: custom (depends on provider)
+        A) which request to which api every X milliseconds fetching Y tasks @ max
+        B) which request should be streamed?
+
+
+) single run
+    creates list of jobs to finish
+        - for every provider as many api-requests as defined
+    works on each job
+        - if auth for provider was not established, establish auth
+        - make api-call
+        - map api-result to ConcreteEntity
+        - map ConcreteEntity to UnifiedEntity
+        - persist both entities
+
+) service run
+
+
+
+classes
+
+Hydra\Core\Model\ConcreteEntity
+Hydra\Core\Model\UnifiedEntity
+Hydra\Core\Model\Job
+Hydra\Core\Model\JobRepository
+    getNextJobs(amount, [type]) returns all unfinished jobs for a fixed type or any type
+    finish(job) marks a job as finished
+
+
+Hydra\Core\Commands\RunOnceCommand
+    instanciates worker
+    instanciates filler
+    calls filler->fill(worker)
+    calls worker->batch()
+Hydra\Core\Commands\RunAsServiceCommand
+    instanciates worker
+    instanciates filler
+    calls worker->run(filler)
+Hydra\Core\Commands\ConfigTwitterCommand
+Hydra\Core\Commands\ConfigFacebookCommand
+Hydra\Core\Commands\ConfigYoutubeCommand
+Hydra\Core\Commands\ConfigTwitterCommand
+
+Hydra\Core\Mapping\AbstractMapper
+Hydra\Core\Mapping\JsonMapper
+    maps json to ConcreteEntity, annotationbased?
+Hydra\Core\Mapping\UnificationMapper
+    maps ConcreteEntities to UnifiedEntity
+Hydra\Core\Queue\Filler
+    fill(worker) calls worker->addJob(job)
+    fills the queue with jobs (api-requests)
+Hydra\Core\Queue\Queue
+    queue implements the execute method and calls the concrete jobhandler
+Hydra\Core\Worker\Worker
+    addJob(Job job)
+    batch() calls filler
+    thread+stream based
+Hydra\Core\Worker\
+Hydra\Providers\Hydra\AbstractAuthenticationProvider
+Hydra\Providers\Hydra\AbstractJobHandler
+Hydra\Providers\Hydra\AbstractRestApi
+Hydra\Providers\Hydra\AbstractStreamingApi
+Hydra\Providers\Hydra\AbstractDataProvider
+    extending classes instanciate ConcreteAuthenticationProvider auth
+    calls auth->createApi(config.yml)
+    calls api->
+    makes api-call based on job and returns list of ConcreteEntities
+Hydra\Providers\Hydra\AbstractStreamingProvider
+    opens streaming connection and pushes ConcreteEntities into UnificationMapper
+Hydra\Providers\Twitter\AuthenticationProvider
+    extends AbstractAuthenticationProvider
+    implements createAuthConfig(cli)
+
+
+
+
+ubuntu:
+    xdg-open
+
+osx:
+    open
+
+windows:
+    start
