@@ -1,6 +1,6 @@
 {
     "name": "gruzilla/hydra",
-    "description": "PHP 5.3+ social media channel aggregator",
+    "description": "PHP 5.4+ social media channel aggregator",
     "keywords": ["hydra", "social media", "aggregation", "security"],
     "license": "GPL",
     "authors": [
