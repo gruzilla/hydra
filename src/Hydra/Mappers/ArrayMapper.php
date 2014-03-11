@@ -3,7 +3,9 @@
 namespace Hydra\Mappers;
 
 use Hydra\Interfaces\MapperInterface,
-    Hydra\Annotation\Map;
+    Hydra\Annotation\Map,
+    Hydra\Annotation\Decoder,
+    Hydra\Decoder\JsonDecoder;
 
 use Doctrine\Common\Annotations\Reader,
     Doctrine\Common\Annotations\AnnotationRegistry,
@@ -23,7 +25,12 @@ class ArrayMapper implements MapperInterface
         $this->reader = $reader ?: new AnnotationReader();
         $this->metadata = array();
 
-        AnnotationRegistry::registerAutoloadNamespace('Hydra\\', array(realpath(__DIR__.'/../../')));
+        // register our own namespace in the doctrine annotation-class-registry
+        // not quite sure, why this is necessary
+        AnnotationRegistry::registerAutoloadNamespace(
+            'Hydra\\',
+            array(realpath(__DIR__.'/../../'))
+        );
     }
 
     /**
@@ -31,29 +38,41 @@ class ArrayMapper implements MapperInterface
      */
     public function map($className, $data)
     {
-        $return = array();
 
-        $data = json_decode($data, true);
+        $metadata = $this->getMetadata($className);
+
+        $decoder = $this->getDecoder($metadata);
+
+        $data = $decoder->decode($data);
 
         if (is_array($data)) {
+            $return = array();
             foreach ($data as $entry) {
                 $entity = new $className;
-                $this->mapEntity($entity, $entry);
+                $this->mapEntity($entity, $metadata, $entry);
                 $return[] = $entity;
             }
-        } else {
-            $entity = new $className;
-            $this->mapEntity($entity, $entry);
-            $return = $entity;
+
+            return $return;
         }
 
-        return $return;
+        $entity = new $className;
+        $this->mapEntity($entity, $metadata, $entry);
+        return $entity;
     }
 
-    protected function mapEntity($entity, $data)
+    protected function getDecoder($metadata)
     {
-        $metadata = $this->getMetadata(get_class($entity));
-        foreach ($metadata as $property => $query) {
+        if (isset($metadata['decoder']) && class_exists($metadata['decoder'])) {
+            return new $metadata['decoder'];
+        }
+
+        return new JsonDecoder();
+    }
+
+    protected function mapEntity($entity, $metadata, $data)
+    {
+        foreach ($metadata['properties'] as $property => $query) {
             $setter = 'set' . ucfirst($property);
             if (is_callable(array($entity, $setter))) {
                 $value = $this->getValue($data, $query);
@@ -79,13 +98,23 @@ class ArrayMapper implements MapperInterface
             return $this->metadata[$class];
         }
 
+        $this->metadata[$class] = array();
+
         $reflection = new \ReflectionClass($class);
 
         $map = array();
 
+        $annotations = $this->reader->getClassAnnotations($reflection);
+        foreach ($annotations as $annotation) {
+            if ($annotation instanceof Decoder) {
+                $this->metadata[$class]['decoder'] = $annotation->getClass();
+                break;
+            }
+        }
+
         foreach ($reflection->getProperties() as $property) {
             $annotations = $this->reader->getPropertyAnnotations($property);
-           foreach ($annotations as $annotation) {
+            foreach ($annotations as $annotation) {
 
                 if (!($annotation instanceof Map)) {
                     continue;
@@ -95,7 +124,7 @@ class ArrayMapper implements MapperInterface
             }
         }
 
-        $this->metadata[$class] = $map;
+        $this->metadata[$class]['properties'] = $map;
 
         return $this->metadata[$class];
     }

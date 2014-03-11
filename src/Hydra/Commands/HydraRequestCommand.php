@@ -135,7 +135,7 @@ class HydraRequestCommand extends Command
             exit;
         }
 
-        $output->writeln(serialize($job->getResult()));
+        $output->writeln(print_r($job->getResult(), 1));
     }
 
 }
