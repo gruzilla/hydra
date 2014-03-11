@@ -53,15 +53,15 @@ class DefaultServiceProvider implements ServiceProviderInterface
             return $this->objectCache[$serviceName];
         }
 
-        if (empty($this->storage->getConsumerKey($serviceName))) {
+        if (null === $this->storage->getConsumerKey($serviceName)) {
             throw new \InvalidArgumentException('Service ' . $serviceName . ' has a configuration file, but the consumer key is not defined!');
         }
 
-        if (empty($this->storage->getConsumerSecret($serviceName))) {
+        if (null === $this->storage->getConsumerSecret($serviceName)) {
             throw new \InvalidArgumentException('Service ' . $serviceName . ' has a configuration file, but the consumer service is not defined!');
         }
 
-        if (empty($this->storage->getCallbackUrl($serviceName))) {
+        if (null === $this->storage->getCallbackUrl($serviceName)) {
             throw new \InvalidArgumentException('Service ' . $serviceName . ' has a configuration file, but the callback url is not defined!');
         }
 

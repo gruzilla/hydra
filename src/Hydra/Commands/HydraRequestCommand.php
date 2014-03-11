@@ -53,7 +53,7 @@ class HydraRequestCommand extends Command
         // create and load hydra
         $worker = new SerialWorker();
         $metadataFactory = null;
-        if (empty($input->getOption('raw'))) {
+        if (null === $input->getOption('raw')) {
             $metadataFactory = new DefaultMetadataFactory();
             $mapper = new ArrayMapper($metadataFactory);
             $worker = new MappedSerialWorker(null, $mapper);
@@ -100,7 +100,7 @@ class HydraRequestCommand extends Command
 
         // ask the user if he wants to map the results before outputting
         $mappedClass = null;
-        if (empty($input->getOption('raw'))) {
+        if (null === $input->getOption('raw')) {
             $mappedClass = $input->getArgument('mappedClass');
             if (empty($mappedClass)) {
                 $mappedClass = $dialog->askAndValidate(
