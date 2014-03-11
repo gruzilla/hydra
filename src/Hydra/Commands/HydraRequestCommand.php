@@ -6,7 +6,9 @@ use Hydra\Hydra,
     Hydra\Jobs\GetJob,
     Hydra\Jobs\MappedJob,
     Hydra\Workers\SerialWorker,
-    Hydra\Workers\MappedSerialWorker;
+    Hydra\Workers\MappedSerialWorker,
+    Hydra\Metadata\DefaultMetadataFactory,
+    Hydra\Mappers\ArrayMapper;
 
 use Symfony\Component\Console\Command\Command,
     Symfony\Component\Console\Input\InputInterface,
@@ -50,8 +52,11 @@ class HydraRequestCommand extends Command
 
         // create and load hydra
         $worker = new SerialWorker();
+        $metadataFactory = null;
         if (empty($input->getOption('raw'))) {
-            $worker = new MappedSerialWorker();
+            $metadataFactory = new DefaultMetadataFactory();
+            $mapper = new ArrayMapper($metadataFactory);
+            $worker = new MappedSerialWorker(null, $mapper);
         }
 
         $hydra = new Hydra($worker);
@@ -121,6 +126,9 @@ class HydraRequestCommand extends Command
         $job = new GetJob($serviceName, $request);
         if (!empty($mappedClass)) {
             $job = MappedJob::createFrom($job, $mappedClass);
+
+            $repositoryClass = $metadataFactory->getRepositoryClassName($mappedClass);
+            $job->setEntityRepository(new $repositoryClass);
         }
 
         $hydra->add($job);

@@ -2,11 +2,20 @@
 
 namespace Hydra\Jobs;
 
-use Hydra\Interfaces\JobInterface;
+use Hydra\Interfaces\JobInterface,
+    Hydra\Interfaces\EntityRepositoryInterface;
 
 class MappedJob extends AbstractJob
 {
+    /**
+     * @var string
+     */
     protected $mappedClass;
+
+    /**
+     * @var EntityRepositoryInterface
+     */
+    protected $repository;
 
     /**
      * creates a basic job with service name and request
@@ -63,6 +72,30 @@ class MappedJob extends AbstractJob
     public function setMappedClass($mappedClass)
     {
         $this->mappedClass = $mappedClass;
+
+        return $this;
+    }
+
+    /**
+     * Gets the value of repository.
+     *
+     * @return EntityRepositoryInterface
+     */
+    public function getEntityRepository()
+    {
+        return $this->repository;
+    }
+
+    /**
+     * Sets the value of repository.
+     *
+     * @param EntityRepositoryInterface $repository the repository
+     *
+     * @return self
+     */
+    public function setEntityRepository(EntityRepositoryInterface $repository)
+    {
+        $this->repository = $repository;
 
         return $this;
     }

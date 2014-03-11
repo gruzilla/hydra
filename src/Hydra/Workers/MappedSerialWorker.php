@@ -4,6 +4,7 @@ namespace Hydra\Workers;
 
 use Hydra\Interfaces\ServiceProviderInterface,
     Hydra\Interfaces\JobInterface,
+    Hydra\Interfaces\MapperInterface,
     Hydra\Jobs\MappedJob,
     Hydra\Mappers\ArrayMapper;
 
@@ -34,6 +35,7 @@ class MappedSerialWorker extends SerialWorker
 
         $job->setResult(
             $this->mapper->map(
+                $job->getEntityRepository(),
                 $job->getMappedClass(),
                 $job->getResult()
             )

@@ -4,5 +4,5 @@ namespace Hydra\Interfaces;
 
 interface MapperInterface
 {
-    public function map($className, $data);
+    public function map(EntityRepositoryInterface $entityRepository, $className, $data);
 }
