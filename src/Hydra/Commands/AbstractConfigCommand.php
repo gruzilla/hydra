@@ -46,6 +46,7 @@ abstract class AbstractConfigCommand extends Command
         if (false !== strpos(strtolower(PHP_OS), 'darwin')) {
             // mac os x
             `open $url`;
+            return;
         }
 
         // only works in linux environments
