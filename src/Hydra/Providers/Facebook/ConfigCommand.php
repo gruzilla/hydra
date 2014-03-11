@@ -2,7 +2,7 @@
 
 namespace Hydra\Providers\Facebook;
 
-use Hydra\Providers\Hydra\AbstractConfigCommand;
+use Hydra\Commands\AbstractConfigCommand;
 
 class ConfigCommand extends AbstractConfigCommand
 {
@@ -13,6 +13,6 @@ class ConfigCommand extends AbstractConfigCommand
      */
     protected function getServiceName()
     {
-        return 'facebook';
+        return 'Facebook';
     }
 }

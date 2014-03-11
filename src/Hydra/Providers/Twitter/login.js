@@ -1,6 +1,12 @@
 'strict';
 
-var casper = require('casper').create();
+var casper = require('casper').create({
+    page: {
+        customHeaders: {
+            'Accept-Language': 'en-us;q=0.5,en;q=0.3'
+        }
+    }
+});
 
 if (casper.cli.args.length !== 3) {
     casper.die('USAGE: casperjs login.js URL USERNAME PASSWORD');
@@ -10,17 +16,7 @@ var url = casper.cli.args[0];
 var username = casper.cli.args[1];
 var password = casper.cli.args[2];
 
-casper.start().then(function() {
-    this.open(
-        url,
-        {
-            method: 'GET',
-            headers: {
-                'Accept-Language': 'en-us;q=0.5,en;q=0.3'
-            }
-        }
-    );
-});
+casper.start(url);
 
 casper.then(function() {
     if (!this.exists('form[id="oauth_form"]')) {
@@ -37,13 +33,29 @@ casper.then(function() {
     }
 });
 
-casper.then(function() {});
-
-casper.then(function() {
+casper.then(function(response) {
     if (this.exists('.error')) {
         this.echo(this.fetchText('.error'));
-    } else {
+        return;
+    }
+
+    if (response.headers.get('X-Hydra')) {
         this.debugPage();
+        return;
+    }
+
+    if (this.exists('.callback a')) {
+        var redirect = this.getElementAttribute('.callback a', 'href');
+
+        this.echo('redirecting to ' + redirect, 'ERROR');
+        casper.open(redirect).then(function() {
+            this.echo('yeah got the redirect', 'INFO');
+            this.debugPage();
+        });
+    } else {
+        this.echo('landed on wrong page.', 'ERROR');
+        require('utils').dump(response);
+        this.debugHTML();
     }
 });
 

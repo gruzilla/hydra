@@ -2,7 +2,7 @@
 
 namespace Hydra\Providers\Twitter;
 
-use Hydra\Providers\Hydra\AbstractConfigCommand;
+use Hydra\Commands\AbstractConfigCommand;
 
 class ConfigCommand extends AbstractConfigCommand
 {
@@ -13,7 +13,7 @@ class ConfigCommand extends AbstractConfigCommand
      */
     protected function getServiceName()
     {
-        return 'twitter';
+        return 'Twitter';
     }
 
     /**
