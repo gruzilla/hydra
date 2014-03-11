@@ -25,8 +25,8 @@ casper.then(function() {
         this.fill(
             'form[id="oauth_form"]',
             {
-                'session[username_or_email]': 'gruzilla',
-                'session[password]': 'twitterrules'
+                'session[username_or_email]': username,
+                'session[password]': password
             },
             true
         );
