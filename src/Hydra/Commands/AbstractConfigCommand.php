@@ -102,7 +102,9 @@ abstract class AbstractConfigCommand extends Command
 
         // try to call auth url with casper, if fails, show it and let the user
         // do it manually
+        $manuallyStopServerIfRunning = false;
         if (!$this->tryCasper($url, $input, $output, $serviceName)) {
+            $manuallyStopServerIfRunning = true;
             $output->writeln('<info>Please open this link and authorize the app:</info>');
             $output->writeln('url: ' . $url);
 
@@ -120,6 +122,13 @@ abstract class AbstractConfigCommand extends Command
 
         // clean up
         if (null !== $this->phpServerProcess) {
+            if ($manuallyStopServerIfRunning) {
+                $dialog->ask(
+                    $output,
+                    '<info>Press [ENTER] to stop the local server.</info>',
+                    false
+                );
+            }
             $this->phpServerProcess->stop();
         }
     }
