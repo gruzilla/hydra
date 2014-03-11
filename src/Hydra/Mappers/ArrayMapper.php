@@ -4,8 +4,15 @@ namespace Hydra\Mappers;
 
 use Hydra\Interfaces\MapperInterface;
 
+use JMS\Serializer\SerializerBuilder;
+
 class ArrayMapper implements MapperInterface
 {
+
+    public function __construct(SerializerInterface $serializer = null)
+    {
+        $this->serializer = $serializer ?: SerializerBuilder::create()->build();
+    }
 
     /**
      * @inheritdoc
