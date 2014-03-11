@@ -189,7 +189,9 @@ abstract class AbstractConfigCommand extends Command
             return false;
         }
 
-        $phpServerCommand = 'exec php -S ' . $callback['host'] . ':' .
+        $phpBinary = $this->askForPhpBinary($input, $output, 'php');
+
+        $phpServerCommand = 'exec ' . $phpBinary . ' -S ' . $callback['host'] . ':' .
                                 $callback['port'] . ' -t ' . $docRoot;
 
         $this->phpServerProcess = new Process(
@@ -199,6 +201,23 @@ abstract class AbstractConfigCommand extends Command
         $this->phpServerProcess->start();
 
         return true;
+    }
+
+    protected function askForPhpBinary(InputInterface $input, OutputInterface $output, $default)
+    {
+        $dialog = $this->getHelperSet()->get('dialog');
+        return $dialog->askAndValidate(
+            $output,
+            'Which PHP binary should be used? [' . $default . ']' . ': ',
+            function ($value) {
+                if (trim($value) === '') {
+                    throw new \Exception('The path to the php binary can not be empty');
+                }
+                return $value;
+            },
+            false,
+            $default
+        );
     }
 
     protected function detectCasperJs()
