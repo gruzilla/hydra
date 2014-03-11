@@ -100,4 +100,18 @@ class Hydra
         // allow chaining
         return $this;
     }
+
+    /**
+     * Sets the value of worker.
+     *
+     * @param WorkerInterface $worker the worker
+     *
+     * @return self
+     */
+    public function setWorker(WorkerInterface $worker)
+    {
+        $this->worker = $worker;
+
+        return $this;
+    }
 }

@@ -32,6 +32,9 @@ class SerialWorker implements WorkerInterface
         $job->setResult(
             $result
         );
+
+        // allow chaining
+        return $this;
     }
 
     public function isRunning() {

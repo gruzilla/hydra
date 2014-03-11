@@ -1,73 +1,35 @@
 <?php
 
-namespace Hydra\Commands;
+namespace Hydra\Commands\Base;
 
 use Hydra\Hydra,
     Hydra\Jobs\GetJob,
     Hydra\Jobs\MappedJob,
-    Hydra\Workers\SerialWorker,
-    Hydra\Workers\MappedSerialWorker,
-    Hydra\Metadata\DefaultMetadataFactory,
-    Hydra\Mappers\ArrayMapper;
+    Hydra\Interfaces\MetadataFactoryInterface;
 
-use Symfony\Component\Console\Command\Command,
-    Symfony\Component\Console\Input\InputInterface,
+use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Console\Input\InputArgument,
-    Symfony\Component\Console\Input\InputOption;
+    Symfony\Component\Console\Helper\DialogHelper;
 
-class HydraRequestCommand extends Command
+class RequestExecuter
 {
-    protected function configure()
+    public function __construct(Hydra $hydra, MetadataFactoryInterface $metadataFactory, DialogHelper $dialogHelper)
     {
-        $this
-            ->setName('hydra:request')
-            ->setDescription('Run a hydra request from the command line')
-            ->addArgument(
-                'service',
-                InputArgument::OPTIONAL,
-                'Which service you want to query (ucfirst!)'
-            )
-            ->addArgument(
-                'request',
-                InputArgument::OPTIONAL,
-                'The api-request you want to send'
-            )
-            ->addArgument(
-                'mappedClass',
-                InputArgument::OPTIONAL,
-                'The entity class you want to map the results to'
-            )
-            ->addOption(
-                'raw',
-                null,
-                InputOption::VALUE_NONE,
-                'If the raw output should be printed'
-            );
+        $this->dialogHelper = $dialogHelper;
+        $this->hydra = $hydra;
+        $this->metadataFactory = $metadataFactory;
+
+        $this->hydra->load();
     }
 
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function execute(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getHelperSet()->get('dialog');
-
-        // create and load hydra
-        $worker = new SerialWorker();
-        $metadataFactory = null;
-        if (null === $input->getOption('raw')) {
-            $metadataFactory = new DefaultMetadataFactory();
-            $mapper = new ArrayMapper($metadataFactory);
-            $worker = new MappedSerialWorker(null, $mapper);
-        }
-
-        $hydra = new Hydra($worker);
-        $hydra->load();
-
         // ask which service to use
-        $services = $hydra->getLoadedServices();
+        $services = $this->hydra->getLoadedServices();
         $serviceName = $input->getArgument('service');
         if (empty($serviceName)) {
             $serviceNames = array_keys($services);
-            $serviceName = $dialog->select(
+            $serviceName = $this->dialogHelper->select(
                 $output,
                 'Please select the service you want to send a request to:',
                 $serviceNames,
@@ -84,7 +46,7 @@ class HydraRequestCommand extends Command
         // Ask which request the user wants to run
         $request = $input->getArgument('request');
         if (empty($request)) {
-            $request = $dialog->askAndValidate(
+            $request = $this->dialogHelper->askAndValidate(
                 $output,
                 'Please specify the api-request you want to send: ',
                 function ($value) {
@@ -100,10 +62,10 @@ class HydraRequestCommand extends Command
 
         // ask the user if he wants to map the results before outputting
         $mappedClass = null;
-        if (null === $input->getOption('raw')) {
+        if (false === $input->getOption('raw')) {
             $mappedClass = $input->getArgument('mappedClass');
             if (empty($mappedClass)) {
-                $mappedClass = $dialog->askAndValidate(
+                $mappedClass = $this->dialogHelper->askAndValidate(
                     $output,
                     'Please specify to which class (FQCN) you want to map the result to: ',
                     function ($value) {
@@ -127,23 +89,13 @@ class HydraRequestCommand extends Command
         if (!empty($mappedClass)) {
             $job = MappedJob::createFrom($job, $mappedClass);
 
-            $repositoryClass = $metadataFactory->getRepositoryClassName($mappedClass);
+            $repositoryClass = $this->metadataFactory->getRepositoryClassName($mappedClass);
             $job->setEntityRepository(new $repositoryClass);
         }
 
-        $hydra->add($job);
-        $hydra->run();
+        $this->hydra->add($job);
+        $this->hydra->run();
 
-
-        // display response
-        if ($input->getOption('raw')) {
-            $output->writeln(
-                $job->getResult()
-            );
-            exit;
-        }
-
-        $output->writeln(print_r($job->getResult(), 1));
+        return $job->getResult();
     }
-
 }

@@ -65,7 +65,7 @@ class ArrayMapper implements MapperInterface
             $property->setAccessible(true);
             $property->setValue(
                 $entity,
-                $this->evalueateQuery($data, $source)
+                $this->evalueateArrayQuery($data, $source)
             );
             $property->setAccessible(!$property->isPrivate() && !$property->isProtected());
         }
@@ -86,7 +86,24 @@ class ArrayMapper implements MapperInterface
         return $this;
     }
 
-    protected function evalueateQuery($data, $query)
+    /**
+     * allows to query php-arrays
+     * valid queries are:
+     *
+     * Example          |   Result
+     * 4                |   returns the 4th index of the array
+     * key              |   returns the index named 'key'
+     * key.subkey       |   returns the index named 'subkey' on the index
+     *                  |   named 'key'. this structure is allowed to go deep
+     * key.0            |   returns the index 0 of the array on the index 'key'
+     * key.count()      |   returns the amount of children the index 'key' has
+     *
+     * @param array  $data  the array that should be searched
+     * @param string $query the query
+     *
+     * @return mixed
+     */
+    public static function evalueateArrayQuery($data, $query)
     {
         // return direct hits
         if (isset($data[$query])) {

@@ -47,9 +47,8 @@ casper.then(function(response) {
     if (this.exists('.callback a')) {
         var redirect = this.getElementAttribute('.callback a', 'href');
 
-        this.echo('redirecting to ' + redirect, 'ERROR');
+        this.echo('redirecting to ' + redirect, 'INFO');
         casper.open(redirect).then(function() {
-            this.echo('yeah got the redirect', 'INFO');
             this.debugPage();
         });
     } else {

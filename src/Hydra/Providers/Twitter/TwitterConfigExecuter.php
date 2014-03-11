@@ -2,20 +2,10 @@
 
 namespace Hydra\Providers\Twitter;
 
-use Hydra\Commands\AbstractConfigCommand;
+use Hydra\Commands\Base\ConfigExecuter;
 
-class ConfigCommand extends AbstractConfigCommand
+class TwitterConfigExecuter extends ConfigExecuter
 {
-    /**
-     * returns the service name
-     *
-     * @return string
-     */
-    protected function getServiceName()
-    {
-        return 'Twitter';
-    }
-
     /**
      * twitter requires an additional parameter for generating the
      * authorization uri

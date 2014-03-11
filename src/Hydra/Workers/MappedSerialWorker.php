@@ -27,11 +27,12 @@ class MappedSerialWorker extends SerialWorker
      */
     public function run(JobInterface $job)
     {
+        parent::run($job);
+
         if (!($job instanceof MappedJob)) {
-            throw new \InvalidArgumentException('MappedSerialWorker only accepts MappedJobs to run!');
+            return $this;
         }
 
-        parent::run($job);
 
         $job->setResult(
             $this->mapper->map(
