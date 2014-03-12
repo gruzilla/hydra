@@ -44,6 +44,19 @@ class HydraTokenStorage extends YamlTokenStorage
         return $this;
     }
 
+    public function getScope($service)
+    {
+        return $this->getParameter($service, 'scope');
+    }
+
+    public function setScope($service, $value)
+    {
+        $this->setParameter($service, 'scope', $value);
+
+        // allow chaining
+        return $this;
+    }
+
     protected function getParameter($service, $parameter)
     {
         // normalize service name

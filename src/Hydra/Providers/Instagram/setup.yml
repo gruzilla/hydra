@@ -1,0 +1,6 @@
+setup: |
+    1. Sign in to the Instagram Developer site.
+    2. Select the application/client for which you'd like to authorize an account.
+    3. Copy and paste the consumer key and secret below when prompted.
+
+link: http://instagram.com/developer/clients/manage/

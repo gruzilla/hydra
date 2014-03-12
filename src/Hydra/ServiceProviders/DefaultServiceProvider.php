@@ -78,7 +78,7 @@ class DefaultServiceProvider implements ServiceProviderInterface
             $currentUri->getAbsoluteUri()
         );
 
-        $this->objectCache[$serviceName] = $serviceFactory->createService($serviceName, $credentials, $this->storage);
+        $this->objectCache[$serviceName] = $serviceFactory->createService($serviceName, $credentials, $this->storage, $this->storage->getScope($serviceName));
 
         return $this->objectCache[$serviceName];
     }
@@ -98,6 +98,9 @@ class DefaultServiceProvider implements ServiceProviderInterface
         $service = $this->createService($serviceName);
 
         if ($provider instanceof OAuth1AccessTokenProviderInterface) {
+            return $provider->retrieveAccessToken($service, $this->storage, $tokenParameters);
+        }
+        if ($provider instanceof OAuth2AccessTokenProviderInterface) {
             return $provider->retrieveAccessToken($service, $this->storage, $tokenParameters);
         }
 

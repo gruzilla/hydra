@@ -89,8 +89,13 @@ class ConfigExecuter
 
         // ask consumer credentials and callback url
         // they get stored automatically on setting the values
-        $this->askConsumerCredentials($input, $output, $this->serviceName);
-        $callbackUrl = $this->askCallbackUrl($input, $output, $this->serviceName);
+        $this->askConsumerCredentials($input, $output);
+
+        // ask scope for authentification
+        $this->askScope($input, $output);
+
+        // ask callback url
+        $this->askCallbackUrl($input, $output);
 
 
         // create service
@@ -176,6 +181,24 @@ class ConfigExecuter
                 exit;
             }
         }
+    }
+
+    protected function askScope(InputInterface $input, OutputInterface $output)
+    {
+
+        $scope = $this->storage->getScope($this->serviceName);
+        $scope = $this->dialog->ask(
+            $output,
+            'Scope (comma seperated)' . ( empty($scope) ? '' : ' [' . implode(',', $scope) . ']') . ': ',
+            $scope
+        );
+
+        $scope = explode(',', $scope);
+
+        $this->storage->setScope($this->serviceName, $scope);
+
+        // chaining
+        return $this;
     }
 
     protected function tryPHPServer(InputInterface $input, OutputInterface $output)
