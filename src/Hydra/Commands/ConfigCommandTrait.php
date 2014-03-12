@@ -146,7 +146,7 @@ trait ConfigCommandTrait
                 }
             );
         } catch (\Exception $e) {
-            $this->output->writeln('<error>' . $e . '</error>');
+            $output->writeln('<error>' . $e . '</error>');
         }
     }
 
@@ -198,7 +198,7 @@ trait ConfigCommandTrait
             join(', ', $scope)
         );
 
-        return array_map('trim', explode(',', $scope));
+        return (empty($scope) ? array() : array_map('trim', explode(',', $scope)));
     }
 
     protected function askConsumerCredentials(InputInterface $input, OutputInterface $output, $key, $secret)
