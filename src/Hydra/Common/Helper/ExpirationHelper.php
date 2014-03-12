@@ -1,38 +1,32 @@
 <?php
 
-namespace Hydra\Commands\Base;
+namespace Hydra\Common\Helper;
 
 use Hydra\Hydra,
     Hydra\Jobs\Job,
     Hydra\OAuth\HydraTokenStorage,
     Hydra\ServiceProviders\DefaultServiceProvider;
 
-use Symfony\Component\Console\Input\InputInterface,
-    Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Console\Input\InputArgument,
-    Symfony\Component\Console\Helper\TableHelper;
-
 use OAuth\Common\Token\TokenInterface;
 
-class ExpirationExecuter
+class ExpirationHelper
 {
-    public function __construct(Hydra $hydra, HydraTokenStorage $storage, TableHelper $tableHelper)
+    public function __construct(Hydra $hydra, HydraTokenStorage $storage)
     {
         $this->hydra = $hydra;
         $this->storage = $storage;
-        $this->tableHelper = $tableHelper;
 
         $this->hydra->load();
 
     }
 
-    public function execute(InputInterface $input, OutputInterface $output)
+    public function getServiceExpirations()
     {
         // get token expiration for every service
         $services = $this->hydra->getLoadedServices();
 
 
-        $rows = array();
+        $expirations = array();
         foreach ($services as $serviceName => $service) {
             $token = $this->storage->retrieveAccessToken($serviceName);
 
@@ -46,17 +40,12 @@ class ExpirationExecuter
                         $eol;
 
 
-            $rows[] = array(
+            $expirations[] = array(
                 $serviceName,
                 $expiration
             );
         }
 
-
-        $this->tableHelper
-            ->setHeaders(array('Service', 'Expiration Status'))
-            ->setRows($rows);
-
-        $this->tableHelper->render($output);
+        return $expirations;
     }
 }

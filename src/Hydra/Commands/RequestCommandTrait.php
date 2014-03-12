@@ -1,31 +1,56 @@
 <?php
 
-namespace Hydra\Commands\Base;
+namespace Hydra\Commands;
 
 use Hydra\Hydra,
-    Hydra\Jobs\GetJob,
-    Hydra\Jobs\MappedJob,
-    Hydra\Interfaces\MetadataFactoryInterface;
+    Hydra\Common\Helper\RequestHelper,
+    Hydra\Metadata\DefaultMetadataFactory,
+    Hydra\Mappers\ArrayMapper,
+    Hydra\Workers\MappedSerialWorker;
 
 use Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Input\InputArgument,
+    Symfony\Component\Console\Input\InputOption,
     Symfony\Component\Console\Output\OutputInterface,
     Symfony\Component\Console\Helper\DialogHelper;
 
-class RequestExecuter
+trait RequestCommandTrait
 {
-    public function __construct(Hydra $hydra, MetadataFactoryInterface $metadataFactory, DialogHelper $dialogHelper)
+    protected function configure()
     {
-        $this->dialogHelper = $dialogHelper;
-        $this->hydra = $hydra;
-        $this->metadataFactory = $metadataFactory;
-
-        $this->hydra->load();
+        $this
+            ->setName('hydra:request')
+            ->setDescription('Run a hydra request from the command line')
+            ->addArgument(
+                'service',
+                InputArgument::OPTIONAL,
+                'Which service you want to query (ucfirst!)'
+            )
+            ->addArgument(
+                'request',
+                InputArgument::OPTIONAL,
+                'The api-request you want to send'
+            )
+            ->addArgument(
+                'mappedClass',
+                InputArgument::OPTIONAL,
+                'The entity class you want to map the results to'
+            )
+            ->addOption(
+                'raw',
+                null,
+                InputOption::VALUE_NONE,
+                'If the raw output should be printed'
+            );
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
+        $dialogHelper = $this->getHelperSet()->get('dialog');
+        $requestHelper = $this->getRequestHelper();
+
         // ask which service to use
-        $services = $this->hydra->getLoadedServices();
+        $services = $requestHelper->getLoadedServices();
         $serviceName = $input->getArgument('service');
         if (empty($serviceName)) {
             $serviceNames = array_keys($services);
@@ -84,18 +109,28 @@ class RequestExecuter
         }
 
 
-        // run hydra
-        $job = new GetJob($serviceName, $request);
-        if (!empty($mappedClass)) {
-            $job = MappedJob::createFrom($job, $mappedClass);
+        $result = $requestHelper->runSingleGetRequest(
+            $serviceName,
+            $request,
+            $mappedClass
+        );
 
-            $repositoryClass = $this->metadataFactory->getRepositoryClassName($mappedClass);
-            $job->setEntityRepository(new $repositoryClass);
-        }
+        $output->writeln(print_r($result, 1));
+    }
 
-        $this->hydra->add($job);
-        $this->hydra->run();
+    protected function getRequestHelper()
+    {
 
-        return $job->getResult();
+        // create and load hydra
+        $metadataFactory = new DefaultMetadataFactory();
+        $mapper = new ArrayMapper($metadataFactory);
+        $worker = new MappedSerialWorker(null, $mapper);
+        $hydra = new Hydra($worker);
+
+
+        return new RequestHelper(
+            $hydra,
+            $metadataFactory
+        );
     }
 }
