@@ -35,7 +35,7 @@ class YamlTokenStorage extends Memory
 
     protected function loadConfigs()
     {
-        $search = getcwd() . '/' . $this->configPath . '/*';
+        $search = $this->configPath . '/*';
         $basePath = dirname($search);
         if (!file_exists($basePath) || !is_writable($basePath)) {
             throw new \RuntimeException(
