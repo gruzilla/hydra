@@ -34,7 +34,7 @@ trait ExpirationCommandTrait
         $tableHelper->render($output);
     }
 
-    protected function getExpirationHelper(InputInterface $input, OutputInterface $output)
+    protected function getExpirationHelper()
     {
         // create and load hydra
         $storage = new HydraTokenStorage();

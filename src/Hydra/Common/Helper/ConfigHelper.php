@@ -134,6 +134,7 @@ class ConfigHelper
         $callbackUrl = $callbackUrlCallback(
             $this->storage->getCallbackUrl($this->serviceName)
         );
+        $this->storage->setCallbackUrl($this->serviceName, $callbackUrl);
 
         if (false !== strpos($this->serviceName, $callbackUrl)) {
 
@@ -165,7 +166,6 @@ class ConfigHelper
                 throw new \RuntimeException('The callback url is not reachable (404)');
             }
         }
-        $this->storage->setCallbackUrl($this->serviceName, $callbackUrl);
     }
 
     protected function updateScope($scopeCallback)
