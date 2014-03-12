@@ -28,7 +28,8 @@
     },
     "autoload": {
         "psr-0": {
-            "Hydra": "src"
+            "Hydra": "src/",
+            "Hydra\\Tests": "tests/"
         }
     },
     "extra": {
