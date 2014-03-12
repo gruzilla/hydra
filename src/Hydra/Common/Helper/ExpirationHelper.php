@@ -37,7 +37,7 @@ class ExpirationHelper
                     'unknown' :
                     $eol === TokenInterface::EOL_NEVER_EXPIRES ?
                         'never' :
-                        $eol;
+                        date('c', $eol);
 
 
             $expirations[] = array(
