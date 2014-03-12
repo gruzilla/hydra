@@ -21,6 +21,8 @@
         "symfony/yaml": "~2.4",
         "doctrine/annotations": "1.*"
     },
+    "require-dev": {
+    },
     "suggest": {
         "kriswallsmith/spork":  "Allows parallel job batch processing."
     },
