@@ -4,7 +4,7 @@ header('X-Hydra: result');
 header('Content-Type: application/json');
 
 // this is dirty.
-chdir(__DIR__ . '/../../../../../../../');
+chdir(dirname(dirname(dirname(dirname(dirname(dirname(dirname(__DIR__))))))));
 ini_set('html_errors', false);
 
 require_once 'vendor/autoload.php';

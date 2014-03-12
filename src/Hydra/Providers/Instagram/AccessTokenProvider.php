@@ -13,7 +13,5 @@ class AccessTokenProvider implements OAuth2AccessTokenProviderInterface
         }
 
         $service->requestAccessToken($parameters['code']);
-
-        $storage->save('Instagram');
     }
 }

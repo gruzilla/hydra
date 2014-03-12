@@ -4,6 +4,7 @@ namespace Hydra\ServiceProviders;
 
 use Hydra\Interfaces\ServiceProviderInterface,
     Hydra\Interfaces\OAuth1AccessTokenProviderInterface,
+    Hydra\Interfaces\OAuth2AccessTokenProviderInterface,
     Hydra\OAuth\HydraTokenStorage;
 
 use OAuth\Common\Consumer\Credentials;
@@ -65,7 +66,7 @@ class DefaultServiceProvider implements ServiceProviderInterface
             throw new \InvalidArgumentException('Service ' . $serviceName . ' has a configuration file, but the callback url is not defined!');
         }
 
-        $callbackUrl = $this->storage->getCallbackUrl($serviceName) . $serviceName;
+        $callbackUrl = $this->storage->getCallbackUrl($serviceName);
 
         /** @var $serviceFactory \OAuth\ServiceFactory An OAuth service factory. */
         $serviceFactory = new \OAuth\ServiceFactory();
@@ -78,7 +79,12 @@ class DefaultServiceProvider implements ServiceProviderInterface
             $currentUri->getAbsoluteUri()
         );
 
-        $this->objectCache[$serviceName] = $serviceFactory->createService($serviceName, $credentials, $this->storage, $this->storage->getScope($serviceName));
+        $this->objectCache[$serviceName] = $serviceFactory->createService(
+            $serviceName,
+            $credentials,
+            $this->storage,
+            $this->storage->getScope($serviceName)
+        );
 
         return $this->objectCache[$serviceName];
     }
@@ -99,8 +105,7 @@ class DefaultServiceProvider implements ServiceProviderInterface
 
         if ($provider instanceof OAuth1AccessTokenProviderInterface) {
             return $provider->retrieveAccessToken($service, $this->storage, $tokenParameters);
-        }
-        if ($provider instanceof OAuth2AccessTokenProviderInterface) {
+        } else if ($provider instanceof OAuth2AccessTokenProviderInterface) {
             return $provider->retrieveAccessToken($service, $this->storage, $tokenParameters);
         }
 

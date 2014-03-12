@@ -2,9 +2,9 @@
 
 namespace Hydra\Providers\Twitter;
 
-use Hydra\Commands\Base\ConfigExecuter;
+use Hydra\Common\Helper\ConfigHelper;
 
-class TwitterConfigExecuter extends ConfigExecuter
+class TwitterConfigHelper extends ConfigHelper
 {
     /**
      * twitter requires an additional parameter for generating the

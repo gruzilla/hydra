@@ -3,4 +3,7 @@ setup: |
     2. Select the application/client for which you'd like to authorize an account.
     3. Copy and paste the consumer key and secret below when prompted.
 
+    Allowed scopes are:
+    basic, comments, relationships, likes
+
 link: http://instagram.com/developer/clients/manage/

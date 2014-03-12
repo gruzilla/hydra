@@ -7,8 +7,7 @@ use Hydra\Hydra,
     Hydra\ServiceProviders\DefaultServiceProvider,
     Hydra\Common\Helper\ExpirationHelper;
 
-use Symfony\Component\Console\Command\Command,
-    Symfony\Component\Console\Input\InputInterface,
+use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Output\OutputInterface;
 
 trait ExpirationCommandTrait

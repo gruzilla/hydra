@@ -11,8 +11,7 @@ use Hydra\Hydra,
 use Symfony\Component\Console\Input\InputInterface,
     Symfony\Component\Console\Input\InputArgument,
     Symfony\Component\Console\Input\InputOption,
-    Symfony\Component\Console\Output\OutputInterface,
-    Symfony\Component\Console\Helper\DialogHelper;
+    Symfony\Component\Console\Output\OutputInterface;
 
 trait RequestCommandTrait
 {
