@@ -54,7 +54,7 @@ trait RequestCommandTrait
         $serviceName = $input->getArgument('service');
         if (empty($serviceName)) {
             $serviceNames = array_keys($services);
-            $serviceName = $this->dialogHelper->select(
+            $serviceName = $dialogHelper->select(
                 $output,
                 'Please select the service you want to send a request to:',
                 $serviceNames,
@@ -71,7 +71,7 @@ trait RequestCommandTrait
         // Ask which request the user wants to run
         $request = $input->getArgument('request');
         if (empty($request)) {
-            $request = $this->dialogHelper->askAndValidate(
+            $request = $dialogHelper->askAndValidate(
                 $output,
                 'Please specify the api-request you want to send: ',
                 function ($value) {
@@ -90,7 +90,7 @@ trait RequestCommandTrait
         if (false === $input->getOption('raw')) {
             $mappedClass = $input->getArgument('mappedClass');
             if (empty($mappedClass)) {
-                $mappedClass = $this->dialogHelper->askAndValidate(
+                $mappedClass = $dialogHelper->askAndValidate(
                     $output,
                     'Please specify to which class (FQCN) you want to map the result to: ',
                     function ($value) {
