@@ -5,14 +5,14 @@ namespace Hydra\Common\Helper;
 use Hydra\Hydra,
     Hydra\Jobs\GetJob,
     Hydra\Jobs\MappedJob,
-    Hydra\Interfaces\MetadataFactoryInterface;
+    Hydra\Interfaces\RepositoryFactoryInterface;
 
 class RequestHelper
 {
-    public function __construct(Hydra $hydra, MetadataFactoryInterface $metadataFactory)
+    public function __construct(Hydra $hydra, RepositoryFactoryInterface $repositoryFactory)
     {
         $this->hydra = $hydra;
-        $this->metadataFactory = $metadataFactory;
+        $this->repositoryFactory = $repositoryFactory;
 
         $this->hydra->load();
     }
@@ -27,10 +27,7 @@ class RequestHelper
         // run hydra
         $job = new GetJob($serviceName, $request);
         if (!empty($mappedClass)) {
-            $job = MappedJob::createFrom($job, $mappedClass);
-
-            $repositoryClass = $this->metadataFactory->getRepositoryClassName($mappedClass);
-            $job->setEntityRepository(new $repositoryClass);
+            $job = MappedJob::createFrom($job, $mappedClass, $this->repositoryFactory);
         }
 
         $this->hydra->add($job);

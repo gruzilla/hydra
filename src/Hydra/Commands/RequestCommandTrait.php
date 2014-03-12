@@ -5,6 +5,7 @@ namespace Hydra\Commands;
 use Hydra\Hydra,
     Hydra\Common\Helper\RequestHelper,
     Hydra\Metadata\DefaultMetadataFactory,
+    Hydra\EntityRepository\DefaultRepositoryFactory,
     Hydra\Mappers\ArrayMapper,
     Hydra\Workers\MappedSerialWorker;
 
@@ -124,12 +125,13 @@ trait RequestCommandTrait
         $metadataFactory = new DefaultMetadataFactory();
         $mapper = new ArrayMapper($metadataFactory);
         $worker = new MappedSerialWorker(null, $mapper);
+        $repositoryFactory = new DefaultRepositoryFactory($metadataFactory);
         $hydra = new Hydra($worker);
 
 
         return new RequestHelper(
             $hydra,
-            $metadataFactory
+            $repositoryFactory
         );
     }
 }

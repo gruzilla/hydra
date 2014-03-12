@@ -3,7 +3,8 @@
 namespace Hydra\Jobs;
 
 use Hydra\Interfaces\JobInterface,
-    Hydra\Interfaces\EntityRepositoryInterface;
+    Hydra\Interfaces\EntityRepositoryInterface,
+    Hydra\Interfaces\RepositoryFactoryInterface;
 
 class MappedJob extends AbstractJob
 {
@@ -38,7 +39,7 @@ class MappedJob extends AbstractJob
      *
      * @return self
      */
-    public static function createFrom(JobInterface $job, $mappedClass)
+    public static function createFrom(JobInterface $job, $mappedClass, RepositoryFactoryInterface $repositoryFactory = null)
     {
         $mappedJob = new MappedJob(
             $job->getServiceName(),
@@ -48,6 +49,12 @@ class MappedJob extends AbstractJob
 
         $mappedJob->setMethod($job->getMethod());
         $mappedJob->setBody($job->getBody());
+
+        if (null !== $repositoryFactory) {
+            $mappedJob->setEntityRepository(
+                $repositoryFactory->getRepositoryForEntity($mappedClass)
+            );
+        }
 
         return $mappedJob;
     }

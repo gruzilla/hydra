@@ -72,7 +72,6 @@ class DefaultMetadataFactory implements MetadataFactoryInterface
         return $this->metadata[$className];
     }
 
-
     protected function loadMetadata($className)
     {
         if (array_key_exists($className, $this->metadata)) {
