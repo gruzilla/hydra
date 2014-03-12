@@ -16,6 +16,8 @@ use Symfony\Component\Console\Input\InputInterface,
 
 trait RequestCommandTrait
 {
+    protected $dialogHelper;
+
     protected function configure()
     {
         $this
@@ -46,7 +48,7 @@ trait RequestCommandTrait
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $dialogHelper = $this->getHelperSet()->get('dialog');
+        $this->dialogHelper = $this->getHelperSet()->get('dialog');
         $requestHelper = $this->getRequestHelper();
 
         // ask which service to use
