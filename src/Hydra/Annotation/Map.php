@@ -15,12 +15,8 @@ final class Map
     public $source;
 
     /**
-     * Gets the value of source.
-     *
-     * @return string
+     * @Optional
+     * @var string
      */
-    public function getSource()
-    {
-        return $this->source;
-    }
+    public $typeMapper;
 }

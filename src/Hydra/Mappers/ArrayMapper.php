@@ -16,6 +16,7 @@ class ArrayMapper implements MapperInterface
      * @var MetadataFactoryInterface
      */
     protected $metadataFactory;
+    protected $typeMapperCache = array();
 
     public function __construct(MetadataFactoryInterface $metadataFactory = null)
     {
@@ -59,20 +60,41 @@ class ArrayMapper implements MapperInterface
         $className = get_class($entity);
 
         $properties = $this->metadataFactory->getProperties($className);
+        $sources = $this->metadataFactory->getMappingSources($className);
+        $typeMappers = $this->metadataFactory->getMappingTypes($className);
 
-        foreach ($properties as $property) {
-            $source = $this->metadataFactory->getMappingSource($className, $property->getName());
+        foreach ($sources as $propertyName => $source) {
+            if (!array_key_exists($propertyName, $properties)) {
+                continue;
+            }
+
+            $property = $properties[$propertyName];
+            $value = $this->evalueateArrayQuery($data, $source);
+
+            if (array_key_exists($propertyName, $typeMappers)) {
+                $value = $this
+                    ->getTypeMapperInstance($typeMappers[$propertyName])
+                    ->map($property, $value);
+            }
+
             $property->setAccessible(true);
             $property->setValue(
                 $entity,
-                $this->evalueateArrayQuery($data, $source)
+                $value
             );
             $property->setAccessible(!$property->isPrivate() && !$property->isProtected());
         }
 
         foreach ($data as $key => $value) {
-            if (isset($properties[$key])) {
+            if (array_key_exists($key, $properties)) {
                 $property = $properties[$key];
+
+                if (array_key_exists($key, $typeMappers)) {
+                    $value = $this
+                        ->getTypeMapperInstance($typeMappers[$key])
+                        ->map($property, $value);
+                }
+
                 $property->setAccessible(true);
                 $property->setValue(
                     $entity,
@@ -84,6 +106,15 @@ class ArrayMapper implements MapperInterface
 
         // allow chaining
         return $this;
+    }
+
+    protected function getTypeMapperInstance($typeMapper)
+    {
+        if (array_key_exists($typeMapper, $this->typeMapperCache)) {
+            return $this->typeMapperCache[$typeMapper];
+        }
+
+        return $this->typeMapperCache[$typeMapper] = new $typeMapper;
     }
 
     /**
@@ -113,12 +144,16 @@ class ArrayMapper implements MapperInterface
         $path = explode('.', $query);
 
         $ref = $data;
+        $found = false;
         while (count($path) > 0) {
 
             $index = array_shift($path);
 
+            $oldref = $ref;
+
             if ($index === 'count()') {
                 $ref = count($ref);
+                $found = true;
                 break;
             }
 
@@ -127,8 +162,17 @@ class ArrayMapper implements MapperInterface
             } else if (is_object($ref) && isset($ref->$index)) {
                 $ref = $ref->$index;
             }
+
+            if ($ref === $oldref) {
+                break;
+            }
+
+            if (count($path) === 0) {
+                $found = true;
+                break;
+            }
         }
 
-        return $ref;
+        return $found ? $ref : null;
     }
 }
