@@ -73,6 +73,8 @@ trait ConfigCommandTrait
         try {
             $configHelper->configure(
 
+                // TODO: refactor - extract functions to separate class let configHelper depend on it
+
                 function ($key, $secret) use ($input, $output) {          // ask for consumer credentials
                     return $this->askConsumerCredentials(
                         $input,

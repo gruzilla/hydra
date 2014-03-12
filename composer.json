@@ -1,12 +1,16 @@
 {
     "name": "gruzilla/hydra",
     "description": "PHP 5.4+ social media channel aggregator",
-    "keywords": ["hydra", "social media", "aggregation", "security"],
+    "keywords": ["hydra", "social media", "aggregation"],
     "license": "GPL",
     "authors": [
         {
             "name": "Matthias Steinböck",
             "email": "matthias.steinboeck@gmail.com"
+        },
+        {
+            "name": "Jakob Lahmer",
+            "email": "jakob.lahmer@gmail.com"
         }
     ],
     "require": {

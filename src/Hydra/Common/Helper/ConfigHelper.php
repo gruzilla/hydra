@@ -234,12 +234,17 @@ class ConfigHelper
         }
     }
 
+    protected function getDocRoot()
+    {
+        return realpath(dirname(dirname(__DIR__)) . '/Resources/DocRoot');
+    }
+
     protected function tryPHPServer($phpBinaryCallback)
     {
 
         $callback = parse_url($this->storage->getCallbackUrl($this->serviceName));
 
-        $docRoot = realpath(dirname(dirname(__DIR__)) . '/Resources/DocRoot');
+        $docRoot = $this->getDocRoot();
 
         if (empty($docRoot) || !file_exists($docRoot)) {
             throw new \RuntimeException('DocRoot not found. Given path: ' . $docRoot);
