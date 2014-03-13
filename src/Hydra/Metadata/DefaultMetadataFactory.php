@@ -47,11 +47,38 @@ class DefaultMetadataFactory implements MetadataFactoryInterface
         throw new \RuntimeException('Could not find decoder for class ' . $className);
     }
 
+    public function getMappingSources($className)
+    {
+        $this->loadMetadata($className);
+        if (array_key_exists('sources', $this->metadata[$className])) {
+            return $this->metadata[$className]['sources'];
+        }
+        return null;
+    }
+
     public function getMappingSource($className, $propertyName)
     {
         $this->loadMetadata($className);
         if (array_key_exists($propertyName, $this->metadata[$className]['sources'])) {
             return $this->metadata[$className]['sources'][$propertyName];
+        }
+        return null;
+    }
+
+    public function getMappingTypes($className)
+    {
+        $this->loadMetadata($className);
+        if (array_key_exists('types', $this->metadata[$className])) {
+            return $this->metadata[$className]['types'];
+        }
+        return null;
+    }
+
+    public function getMappingType($className, $propertyName)
+    {
+        $this->loadMetadata($className);
+        if (array_key_exists($propertyName, $this->metadata[$className]['types'])) {
+            return $this->metadata[$className]['types'][$propertyName];
         }
         return null;
     }
@@ -80,7 +107,7 @@ class DefaultMetadataFactory implements MetadataFactoryInterface
 
         $this->metadata[$className] = array(
             'decoder'       => 'Hydra\Decoder\JsonDecoder',
-            'repository'    => 'Hydra\EntityRepository\DefaultEntityRepository',
+            'repository'    => null,
             'sources'       => array(),
             'properties'    => array()
         );
@@ -88,14 +115,15 @@ class DefaultMetadataFactory implements MetadataFactoryInterface
         $reflection = new \ReflectionClass($className);
 
         $sourceMap = array();
+        $typeMap = array();
 
         $annotations = $this->reader->getClassAnnotations($reflection);
         foreach ($annotations as $annotation) {
             if ($annotation instanceof Decoder) {
-                $this->metadata[$className]['decoder'] = $annotation->getClass();
+                $this->metadata[$className]['decoder'] = $annotation->class;
             }
             if ($annotation instanceof Repository) {
-                $this->metadata[$className]['repository'] = $annotation->getClass();
+                $this->metadata[$className]['repository'] = $annotation->class;
             }
         }
 
@@ -103,18 +131,30 @@ class DefaultMetadataFactory implements MetadataFactoryInterface
             $annotations = $this->reader->getPropertyAnnotations($property);
             $propertyMap[$property->getName()] = $property;
 
+            $typeMapper = null;
+            $doctrineMapper = null;
             foreach ($annotations as $annotation) {
 
-                if (!($annotation instanceof Map)) {
-                    continue;
+                if (get_class($annotation) === 'Doctrine\ORM\Mapping\Column') {
+                    $doctrineMapper = 'Hydra\\Mappers\\Types\\' . ucfirst(strtolower($annotation->type));
                 }
 
-                $sourceMap[$property->getName()] = $annotation->getSource();
+                if ($annotation instanceof Map) {
+                    $sourceMap[$property->getName()] = $annotation->source;
+                    $typeMapper = $annotation->typeMapper;
+                }
+            }
+
+            if (null !== $typeMapper && class_exists($typeMapper)) {
+                $typeMap[$property->getName()] = $typeMapper;
+            } else if (null !== $doctrineMapper && class_exists($doctrineMapper)) {
+                $typeMap[$property->getName()] = $doctrineMapper;
             }
         }
 
         $this->metadata[$className]['properties'] = $propertyMap;
         $this->metadata[$className]['sources'] = $sourceMap;
+        $this->metadata[$className]['types'] = $typeMap;
 
         // allow chaining
         return $this;
