@@ -22,6 +22,7 @@
         "doctrine/annotations": "1.*"
     },
     "require-dev": {
+        "mikey179/vfsStream": "~1.2"
     },
     "suggest": {
         "kriswallsmith/spork":  "Allows parallel job batch processing."
