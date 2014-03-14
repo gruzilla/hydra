@@ -4,6 +4,7 @@
     <testsuites>
         <testsuite name="Hydra Test Suite">
             <directory suffix="Test.php">./tests/</directory>
+            <directory suffix="Stub.php">./tests/</directory>
         </testsuite>
     </testsuites>
 

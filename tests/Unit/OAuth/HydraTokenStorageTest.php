@@ -25,16 +25,27 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
     /**
      * setup test environment
      */
-    public function setUp() {
+    public function setUp()
+    {
         $this->root = vfsStream::setup('root', null, array('config' => array('hydra' => array())));
         $this->storage = new HydraTokenStorage(vfsStream::url('root/config/hydra'));
+    }
+
+    /**
+     * @expectedException   \RuntimeException
+     */
+    public function testConfigDirNotExists()
+    {
+        $this->root = vfsStream::setup('root');
+        $this->storage = new HydraTokenStorage();
     }
 
     /**
      * @cover Hydra\OAuth\YamlTokenStorage::loadConfigs
      * @cover Hydra\OAuth\YamlTokenStorage::save
      */
-    public function testCreateConfig()   {
+    public function testCreateConfig()
+    {
         $this->storage->setConsumerKey($this->sampleServiceName, 'sampleKey');
         $this->assertTrue($this->root->hasChild('config/hydra/' . ucfirst($this->sampleServiceName) . '.yml'));
     }
@@ -42,7 +53,8 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover Hydra\OAuth\YamlTokenStorage::hasConfig
      */
-    public function testHasConfig() {
+    public function testHasConfig()
+    {
         $this->storage->setConsumerKey($this->sampleServiceName, 'sampleKey');
         $this->assertTrue($this->storage->hasConfig($this->sampleServiceName));
     }
@@ -50,7 +62,8 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
     /**
      * @cover Hydra\OAuth\YamlTokenStorage::getLoadedServicesNames
      */
-    public function testGetLoadedServicesNames() {
+    public function testGetLoadedServicesNames()
+    {
         $this->storage->setConsumerKey($this->sampleServiceName, 'sampleKey');
         $this->assertContains(ucfirst($this->sampleServiceName), $this->storage->getLoadedServicesNames());
     }
@@ -59,7 +72,8 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
      * @cover Hydra\OAuth\HydraTokenStorage::setConsumerKey
      * @cover Hydra\OAuth\HydraTokenStorage::getConsumerKey
      */
-    public function testSaveAndLoadConsumerKey()   {
+    public function testSaveAndLoadConsumerKey()
+    {
         $this->assertNull($this->storage->getConsumerKey($this->sampleServiceName));
         $this->storage->setConsumerKey($this->sampleServiceName, 'sampleKey');
         $this->assertEquals($this->storage->getConsumerKey($this->sampleServiceName), 'sampleKey');
@@ -69,7 +83,8 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
      * @cover Hydra\OAuth\HydraTokenStorage::setConsumerSecret
      * @cover Hydra\OAuth\HydraTokenStorage::getConsumerSecret
      */
-    public function testSaveAndLoadConsumerSecret()   {
+    public function testSaveAndLoadConsumerSecret()
+    {
         $this->assertNull($this->storage->getConsumerSecret($this->sampleServiceName));
         $this->storage->setConsumerSecret($this->sampleServiceName, 'sampleSecret');
         $this->assertEquals($this->storage->getConsumerSecret($this->sampleServiceName), 'sampleSecret');
@@ -79,11 +94,30 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
      * @cover Hydra\OAuth\HydraTokenStorage::getCallbackUrl
      * @cover Hydra\OAuth\HydraTokenStorage::setCallbackUrl
      */
-    public function testSaveAndLoadCallbackUrl()   {
+    public function testSaveAndLoadCallbackUrl()
+    {
         $this->assertNull($this->storage->getCallbackUrl($this->sampleServiceName));
         $this->storage->setCallbackUrl($this->sampleServiceName, 'http://example.com:8000');
         $this->assertEquals($this->storage->getCallbackUrl($this->sampleServiceName), 'http://example.com:8000');
     }
 
+    /**
+     * @cover Hydra\OAuth\HydraTokenStorage::getScope
+     * @cover Hydra\OAuth\HydraTokenStorage::setScope
+     */
+    public function testSaveAndLoadScope()
+    {
+        $this->assertNull($this->storage->getScope($this->sampleServiceName));
+        $this->storage->setScope($this->sampleServiceName, array('basic','comments'));
+        $this->assertEquals($this->storage->getScope($this->sampleServiceName), array('basic','comments'));
+    }
 
+    /**
+     * @expectedException   \RuntimeException
+     * @cover Hydra\OAuth\HydraTokenStorage::setScope
+     */
+    public function testScopeMustBeArrayException()
+    {
+        $this->storage->setScope($this->sampleServiceName, 'no_array_given');
+    }
 }

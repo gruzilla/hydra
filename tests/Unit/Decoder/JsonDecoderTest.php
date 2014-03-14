@@ -12,7 +12,8 @@ class JsonDecoderTest extends \PHPUnit_Framework_TestCase
     /**
      * data provider for jsondecode test
      */
-    public function provider()   {
+    public function provider()
+    {
         return array(
             array('{"J":5,"0":"N","W":{"T":1,"F":5}}', array("J" => 5, "0" => "N", "W" => array("T" => 1, "F" => 5))),
         );
@@ -21,7 +22,8 @@ class JsonDecoderTest extends \PHPUnit_Framework_TestCase
     /**
      * @dataProvider provider
      */
-    public function testDecode($data, $result) {
+    public function testDecode($data, $result)
+    {
         $jsonDecoder = new JsonDecoder();
 
         $this->assertInstanceOf('\\Hydra\\Interfaces\\DecoderInterface', $jsonDecoder);

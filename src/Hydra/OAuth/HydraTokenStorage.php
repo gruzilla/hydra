@@ -51,6 +51,9 @@ class HydraTokenStorage extends YamlTokenStorage
 
     public function setScope($service, $value)
     {
+        if(!is_array($value)) {
+            throw new \RuntimeException('Scope has to be an array!');
+        }
         $this->setParameter($service, 'scope', $value);
 
         // allow chaining
