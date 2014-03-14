@@ -2,9 +2,11 @@
 
 namespace Hydra\Tests\Common\Helper;
 
-use Hydra\Common\Helper\RequestHelper;
+use Hydra\Hydra,
+    Hydra\Common\Helper\RequestHelper;
 
 use Hydra\Mocks\ServiceProviders\DefaultServiceProviderStub;
+use Hydra\Mocks\OAuth\HydraTokenStorageStub;
 
 class RequestHelperTest extends \PHPUnit_Framework_TestCase
 {
@@ -12,9 +14,14 @@ class RequestHelperTest extends \PHPUnit_Framework_TestCase
 
     public function testConstructor()
     {
-        $hydra = $this->getMockBuilder('\\Hydra\\Hydra')
-                        ->setConstructorArgs(array(null, new DefaultServiceProviderStub()))
-                        ->getMock();
+
+        $defaultServiceProviderStub = 
+            $this->getMockBuilder('Hydra\ServiceProviders\DefaultServiceProvider')
+                    ->setConstructorArgs(array(new HydraTokenStorageStub()))
+                    ->getMock();
+
+
+        $hydra = new \Hydra\Hydra(null, $defaultServiceProviderStub);
 
         $requestHelper = new RequestHelper(
             $hydra,
@@ -23,6 +30,7 @@ class RequestHelperTest extends \PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('Hydra\Common\Helper\RequestHelper', $requestHelper);
     }
+
 
 
 

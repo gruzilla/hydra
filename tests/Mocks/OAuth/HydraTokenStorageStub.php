@@ -21,11 +21,4 @@ class HydraTokenStorageStub extends HydraTokenStorage
 
     }
 
-
-    public function storeAccessToken($serviceName, \OAuth\Common\Token\TokenInterface $token)
-    {
-
-    }
-
-
 }
