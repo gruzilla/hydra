@@ -33,11 +33,26 @@ class HydraTokenStorageTest extends \PHPUnit_Framework_TestCase
 
     /**
      * @expectedException   \RuntimeException
+     * @cover Hydra\OAuth\YamlTokenStorage:loadConfigs
      */
     public function testConfigDirNotExists()
     {
         $this->root = vfsStream::setup('root');
         $this->storage = new HydraTokenStorage();
+    }
+
+    /**
+     * @cover Hydra\OAuth\YamlTokenStorage:loadConfigs
+     * @cover Hydra\OAuth\YamlTokenStorage:hasConfig
+     */
+    public function testLoadConfigFromFile()
+    {
+        $this->storage->setConsumerKey($this->sampleServiceName, 'sampleKey');
+        $this->assertTrue($this->root->hasChild('config/hydra/' . ucfirst($this->sampleServiceName) . '.yml'));
+
+        // create new storage to test loadConfigs
+        $this->storage = new HydraTokenStorage(vfsStream::url('root/config/hydra'));
+        $this->assertTrue($this->storage->hasConfig($this->sampleServiceName));
     }
 
     /**

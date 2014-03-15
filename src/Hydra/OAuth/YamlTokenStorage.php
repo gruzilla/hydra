@@ -43,7 +43,12 @@ class YamlTokenStorage extends Memory
                 'exist. Please create it and make sure it is writable.'
             );
         }
-        $serviceConfigs = glob($search);
+        
+        // glob is not stream save, therefor we use php5 recursiveiterator
+        $serviceConfigs = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($this->configPath), 
+                        \RecursiveIteratorIterator::CHILD_FIRST);
+
         foreach ($serviceConfigs as $configFile) {
             $serviceName = ucfirst(explode('.', basename($configFile))[0]);
 
